@@ -13,6 +13,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   status: boolean;
 
   @IsOptional()
-  @IsIn(Object.keys(UserRole))
+  @IsIn(Object.values(UserRole))
   role: string;
 }
