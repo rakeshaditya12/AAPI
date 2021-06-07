@@ -16,6 +16,8 @@ export class RolesGuard implements CanActivate {
     const { user } = request as any;
     const role = user ? user.role : 'consumer';
 
+    if (!url.trim().length) return true;
+
     const accessControl = new AccessControl(grantsObject);
     const permission = await accessControl
       .can(role)
