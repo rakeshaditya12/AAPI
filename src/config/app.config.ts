@@ -5,7 +5,7 @@ const schema = {
     name: {
       doc: 'Name of the service',
       format: String,
-      default: 'trueFi-vault',
+      default: 'nodejs-boilerplate',
     },
     base_url: {
       doc: 'Base URL of platform',
@@ -60,7 +60,7 @@ const schema = {
     name: {
       doc: 'Database Name',
       format: String,
-      default: 'trueFi-vault',
+      default: 'nodejs-boilerplate',
       env: 'DB_NAME',
     },
   },

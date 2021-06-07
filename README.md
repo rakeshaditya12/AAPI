@@ -51,10 +51,6 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Stay in touch
-
-- Author - [Abhishek Parmar](https://www.linkedin.com/in/abhishek-parmar-19a875122/)
-
 ## License
 
 NestJs Boilerplate is [MIT licensed](LICENSE).
