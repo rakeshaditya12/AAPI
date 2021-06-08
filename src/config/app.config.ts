@@ -1,4 +1,5 @@
 import convict from 'convict';
+import dotenv from 'dotenv';
 
 const schema = {
   app: {
@@ -84,6 +85,7 @@ const schema = {
   },
 };
 
+dotenv.config();
 const config = convict(schema);
 type Config = Record<keyof typeof schema, any>;
 config.validate({ allowed: 'strict' });
