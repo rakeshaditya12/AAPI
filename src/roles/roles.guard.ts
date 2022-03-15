@@ -11,25 +11,26 @@ import { grantsObject } from './role.acl';
 @Injectable()
 export class RolesGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const url = request.originalUrl.split('?')[0].split('/')[1];
-    const { user } = request as any;
-    const role = user ? user.role : 'consumer';
+    // const request = context.switchToHttp().getRequest<Request>();
+    // const url = request.originalUrl.split('?')[0].split('/')[1];
+    // const { user } = request as any;
+    // const role = user ? user.role : 'consumer';
 
-    if (!url.trim().length) return true;
+    // if (!url.trim().length) return true;
 
-    const accessControl = new AccessControl(grantsObject);
-    const permission = await accessControl
-      .can(role)
-      .execute(request.method)
-      .on(url);
+    // const accessControl = new AccessControl(grantsObject);
+    // const permission = await accessControl
+    //   .can(role)
+    //   .execute(request.method)
+    //   .on(url);
 
-    if (!permission.granted) {
-      throw new ForbiddenException(
-        'You have no access to perform such action.',
-      );
-    }
+    // if (!permission.granted) {
+    //   throw new ForbiddenException(
+    //     'You have no access to perform such action.',
+    //   );
+    // }
 
-    return permission.granted;
+    // return permission.granted;
+    return true;
   }
 }

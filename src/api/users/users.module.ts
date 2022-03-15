@@ -18,8 +18,10 @@ import { UsersTokenRepository } from '../../database/repositories/user-token.rep
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthenticateMiddleware).forRoutes('users');
-  }
-}
+
+export class UsersModule {}
+// export class UsersModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(AuthenticateMiddleware).forRoutes('users');
+//   }
+// }

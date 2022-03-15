@@ -14,6 +14,7 @@ export class BaseRepository<
   ): Promise<Entity> {
     const value = await this.findOne(id, options);
     if (!value) {
+      console.log(this.metadata.name);
       throw new NotFoundException(
         `Could not find any matching record: ${id} for entity of type ${this.metadata.name}`,
         `${this.metadata.name.toUpperCase()}_NOT_FOUND`,

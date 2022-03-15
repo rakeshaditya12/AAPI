@@ -18,6 +18,9 @@ import { UserTokens } from '../../database/entities/user-token.entity';
 import { UserTokenSchema } from './interface/logout-request.interface';
 import { UsersRepository } from '../../database/repositories/user.repository';
 import { UsersTokenRepository } from '../../database/repositories/user-token.repository';
+// import { MembersRepository } from '../../database/repositories/member.repository';
+// import { MembersTokenRepository } from '../../database/repositories/member-token.repository';
+// import { MemberTokens } from 'src/database/entities/members-token.entity';
 
 @Injectable()
 export class AuthService {
@@ -26,12 +29,15 @@ export class AuthService {
     private readonly userTokensRepository: UsersTokenRepository,
     private readonly config: ConfigService,
     private readonly tokenService: TokenService,
+    // private readonly memberRepository: MembersRepository,
+    // private readonly memberTokensRepository: MembersTokenRepository,
   ) {}
 
   async login(loginDto: LoginDto) {
     const user = await this.usersRepository.findByEmail(loginDto.email, {
       select: ['id', 'password', 'status'],
     });
+
     if (!user) {
       throw new UnauthorizedException('Incorrect credentials.');
     }
@@ -144,4 +150,53 @@ export class AuthService {
       await this.userTokensRepository.delete(userToken.id);
     }
   }
+
+  // async memberLogin(loginDto: LoginDto) {
+  //   console.log(loginDto);
+  //   const member = await this.memberRepository.findByEmail(loginDto.email, {
+  //     select: ['id', 'password'],
+  //   });
+
+  //   if (!member) {
+  //     throw new UnauthorizedException('Incorrect credentials.1');
+  //   }
+
+  //   const passwordMatched = await comparePassword(
+  //     loginDto.password,
+  //     member.password,
+  //   );
+
+  //   if (!passwordMatched) {
+  //     throw new UnauthorizedException('Incorrect credentials.2');
+  //   }
+
+  //   const payload: { tokenId: string } = {
+  //     tokenId: v4(),
+  //   };
+
+  //   const accessToken = await this.tokenService.signAccessToken(
+  //     member.id,
+  //     payload,
+  //   );
+  //   const refreshToken = await this.tokenService.signRefreshToken(
+  //     member.id,
+  //     payload,
+  //   );
+
+  //   const expiresIn = this.config.get('accessTokenLifetime') * 60;
+  //   const memberToken = new MemberTokens();
+  //   memberToken.members = member.id as any;
+  //   memberToken.tokenId = payload.tokenId;
+  //   memberToken.expiresIn = expiresIn;
+  //   await memberToken.save();
+
+  //   const loginResponse: LoginResponse = {
+  //     tokenType: 'bearer',
+  //     accessToken,
+  //     expiresIn,
+  //     refreshToken,
+  //   };
+
+  //   return loginResponse;
+  // }
 }

@@ -8,13 +8,22 @@ import { AuthenticateMiddleware } from '../../authenticate/authenticate.middlewa
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersRepository } from '../../database/repositories/user.repository';
 import { UsersTokenRepository } from '../../database/repositories/user-token.repository';
+// import { MembersRepository } from 'src/database/repositories/member.repository';
+// import { MembersTokenRepository } from 'src/database/repositories/member-token.repository';
+// import { MembershipModule } from '../membership/membership.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UsersRepository, UsersTokenRepository]),
+    TypeOrmModule.forFeature([
+      UsersRepository,
+      UsersTokenRepository,
+      // MembersRepository,
+      // MembersTokenRepository,
+    ]),
     ConfigModule,
     TokenModule,
     UsersModule,
+    // MembershipModule,
   ],
   providers: [AuthService],
   controllers: [AuthController],

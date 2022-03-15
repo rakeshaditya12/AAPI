@@ -29,7 +29,7 @@ export class UsersService {
     user.email = createUserDto.email;
     user.password = await hashPassword(createUserDto.password);
     user.role = UserRole.USER;
-    await user.save();
+    return await user.save();
   }
 
   async getUsers(page: number, perPage: number) {
