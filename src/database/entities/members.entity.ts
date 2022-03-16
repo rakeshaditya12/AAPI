@@ -14,11 +14,15 @@ export class Members extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'enum', enum: MemberType })
-  member_type: string;
+  @Column({
+    type: 'enum',
+    enum: MemberType,
+    default: MemberType.PracticingPhysician,
+  })
+  member_type: MemberType;
 
-  @Column({ type: 'enum', enum: MemberSubType })
-  member_sub_type: string;
+  @Column({ type: 'enum', enum: MemberSubType, default: MemberSubType.Annual })
+  member_sub_type: MemberSubType;
 
   @Column('character varying', { length: 255 })
   profile_picture: string;

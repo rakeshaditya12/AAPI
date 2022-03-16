@@ -26,9 +26,9 @@ export class AuthController {
     return this.authService.logout(user);
   }
 
-  // @Post('members/login')
-  // async memberLogin(@Body() login: LoginDto) {
-  //   const loginResponse = await this.authService.memberLogin(login);
-  //   return loginResponse;
-  // }
+  @Post('members/login')
+  async memberLogin(@Body() login: LoginDto) {
+    const loginResponse = await this.authService.memberLogin(login);
+    return loginResponse;
+  }
 }

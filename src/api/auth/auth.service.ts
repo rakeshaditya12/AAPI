@@ -18,9 +18,9 @@ import { UserTokens } from '../../database/entities/user-token.entity';
 import { UserTokenSchema } from './interface/logout-request.interface';
 import { UsersRepository } from '../../database/repositories/user.repository';
 import { UsersTokenRepository } from '../../database/repositories/user-token.repository';
-// import { MembersRepository } from '../../database/repositories/member.repository';
-// import { MembersTokenRepository } from '../../database/repositories/member-token.repository';
-// import { MemberTokens } from 'src/database/entities/members-token.entity';
+import { MembersRepository } from '../../database/repositories/member.repository';
+import { MembersTokenRepository } from '../../database/repositories/member-token.repository';
+import { MemberTokens } from 'src/database/entities/members-token.entity';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +29,8 @@ export class AuthService {
     private readonly userTokensRepository: UsersTokenRepository,
     private readonly config: ConfigService,
     private readonly tokenService: TokenService,
-    // private readonly memberRepository: MembersRepository,
-    // private readonly memberTokensRepository: MembersTokenRepository,
+    private readonly memberRepository: MembersRepository,
+    private readonly memberTokensRepository: MembersTokenRepository,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -151,52 +151,52 @@ export class AuthService {
     }
   }
 
-  // async memberLogin(loginDto: LoginDto) {
-  //   console.log(loginDto);
-  //   const member = await this.memberRepository.findByEmail(loginDto.email, {
-  //     select: ['id', 'password'],
-  //   });
+  async memberLogin(loginDto: LoginDto) {
+    console.log(loginDto);
+    const member = await this.memberRepository.findByEmail(loginDto.email, {
+      select: ['id', 'password'],
+    });
 
-  //   if (!member) {
-  //     throw new UnauthorizedException('Incorrect credentials.1');
-  //   }
+    if (!member) {
+      throw new UnauthorizedException('Incorrect credentials.');
+    }
 
-  //   const passwordMatched = await comparePassword(
-  //     loginDto.password,
-  //     member.password,
-  //   );
+    const passwordMatched = await comparePassword(
+      loginDto.password,
+      member.password,
+    );
 
-  //   if (!passwordMatched) {
-  //     throw new UnauthorizedException('Incorrect credentials.2');
-  //   }
+    if (!passwordMatched) {
+      throw new UnauthorizedException('Incorrect credentials.');
+    }
 
-  //   const payload: { tokenId: string } = {
-  //     tokenId: v4(),
-  //   };
+    const payload: { tokenId: string } = {
+      tokenId: v4(),
+    };
 
-  //   const accessToken = await this.tokenService.signAccessToken(
-  //     member.id,
-  //     payload,
-  //   );
-  //   const refreshToken = await this.tokenService.signRefreshToken(
-  //     member.id,
-  //     payload,
-  //   );
+    const accessToken = await this.tokenService.signAccessToken(
+      member.id,
+      payload,
+    );
+    const refreshToken = await this.tokenService.signRefreshToken(
+      member.id,
+      payload,
+    );
 
-  //   const expiresIn = this.config.get('accessTokenLifetime') * 60;
-  //   const memberToken = new MemberTokens();
-  //   memberToken.members = member.id as any;
-  //   memberToken.tokenId = payload.tokenId;
-  //   memberToken.expiresIn = expiresIn;
-  //   await memberToken.save();
+    const expiresIn = this.config.get('accessTokenLifetime') * 60;
+    const memberToken = new MemberTokens();
+    memberToken.members = member.id as any;
+    memberToken.tokenId = payload.tokenId;
+    memberToken.expiresIn = expiresIn;
+    await memberToken.save();
 
-  //   const loginResponse: LoginResponse = {
-  //     tokenType: 'bearer',
-  //     accessToken,
-  //     expiresIn,
-  //     refreshToken,
-  //   };
+    const loginResponse: LoginResponse = {
+      tokenType: 'bearer',
+      accessToken,
+      expiresIn,
+      refreshToken,
+    };
 
-  //   return loginResponse;
-  // }
+    return loginResponse;
+  }
 }
