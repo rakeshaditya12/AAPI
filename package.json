@@ -31,7 +31,8 @@
     "typeorm:seed:generate": "npm run typeorm:seed -- migration:run",
     "typeorm:seed:undo": "ts-node ./node_modules/typeorm/cli.js --config src/database/config/postgres-seeds.config.ts migration:revert",
     "typeorm:seed:prod": "node ./node_modules/typeorm/cli.js --config dist/database/config/postgres-seeds.config.js migration:run",
-    "typeorm:seed:prod:undo": "node ./node_modules/typeorm/cli.js --config dist/config/postgres-seeds.config.js migration:revert"
+    "typeorm:seed:prod:undo": "node ./node_modules/typeorm/cli.js --config dist/config/postgres-seeds.config.js migration:revert",
+    "migration:generate": "npm run build && npm run typeorm migration:generate -- -n"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",

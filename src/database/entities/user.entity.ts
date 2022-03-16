@@ -25,7 +25,7 @@ export class Users extends BaseEntity {
   @Column('character varying', { nullable: false, select: false })
   password!: string;
 
-  @Column('boolean', { default: () => false })
+  @Column('boolean', { default: false })
   status!: boolean;
 
   @Column({ type: 'enum', enum: UserRole })
