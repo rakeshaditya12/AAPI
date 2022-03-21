@@ -214,14 +214,17 @@ export class MembershipService {
       .innerJoinAndSelect('member.address', 'address')
       .where({ first_name: 'rakesh', last_name: 'hirve' });
 
-    // return await this.membersRepository.find({
-    //   relations: ['address'],
-    //   where: {
-    //     address: {
-    //       city: 'city',
-    //     },
-    //   },
-    // });
+    return this.membersRepository
+      .createQueryBuilder('members')
+      .innerJoinAndSelect(
+        'members.address',
+        'address',
+        'address.city = :city',
+        {
+          city: 'cityy',
+        },
+      )
+      .getMany();
     return await query.getMany();
   }
 }
