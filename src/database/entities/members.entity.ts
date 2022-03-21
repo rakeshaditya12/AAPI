@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { MembersAddress } from './members-address.entity';
 import { MemberTokens } from './members-token.entity';
 
 @Entity('members', { schema: 'public' })
@@ -140,4 +141,7 @@ export class Members extends BaseEntity {
 
   @OneToMany(() => MemberTokens, (memberTokens) => memberTokens.members)
   memberTokens!: MemberTokens[];
+
+  @OneToMany(() => MembersAddress, (address) => address.member)
+  address: MembersAddress;
 }

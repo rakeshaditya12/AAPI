@@ -9,8 +9,8 @@ export class MembersPayment extends BaseEntity {
   @Column('character varying', { length: 255 })
   card_holder_name: string;
 
-  @Column({ type: 'enum', enum: CardType })
-  card_type: string;
+  @Column({ type: 'enum', enum: CardType, default: CardType.AmericanExpress })
+  card_type: CardType;
 
   @Column({ type: 'int' })
   card_number: number;

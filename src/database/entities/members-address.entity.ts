@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Members } from './members.entity';
 
 @Entity('members_address', { schema: 'public' })
 export class MembersAddress extends BaseEntity {
@@ -37,4 +45,11 @@ export class MembersAddress extends BaseEntity {
 
   @Column()
   member_id: string;
+
+  // @Column()
+  // memberId: string;
+
+  @ManyToOne(() => Members, (member) => member.address)
+  @JoinColumn()
+  member: Members;
 }

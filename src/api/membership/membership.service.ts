@@ -6,7 +6,9 @@ import { MembersPhone } from 'src/database/entities/members-phone.entity';
 import { Members } from 'src/database/entities/members.entity';
 import { MembersRepository } from 'src/database/repositories/member.repository';
 import { hashPassword } from 'src/utils/password';
+import { createQueryBuilder, getManager, getRepository } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
+import { SearchMemberDto } from './dto/search-member.dto';
 
 @Injectable()
 export class MembershipService {
@@ -138,7 +140,8 @@ export class MembershipService {
         if ('address_visible' in singleAddress) {
           membersAddress.address_visible = singleAddress.address_visible;
         }
-        membersAddress.member_id = member.id;
+        // membersAddress.member_id = member.id;
+        membersAddress.member = member;
         await membersAddress.save();
       });
 
@@ -202,5 +205,23 @@ export class MembershipService {
         }
       });
     }
+  }
+
+  async searchMembers(searchMemberDto: SearchMemberDto) {
+    console.log(searchMemberDto);
+
+    const query = createQueryBuilder('members', 'member')
+      .innerJoinAndSelect('member.address', 'address')
+      .where({ first_name: 'rakesh', last_name: 'hirve' });
+
+    // return await this.membersRepository.find({
+    //   relations: ['address'],
+    //   where: {
+    //     address: {
+    //       city: 'city',
+    //     },
+    //   },
+    // });
+    return await query.getMany();
   }
 }
