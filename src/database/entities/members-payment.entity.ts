@@ -1,5 +1,13 @@
 import { CardType } from 'src/constants/card-type.enum';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Members } from './members.entity';
 
 @Entity('members_payment', { schema: 'public' })
 export class MembersPayment extends BaseEntity {
@@ -44,4 +52,8 @@ export class MembersPayment extends BaseEntity {
 
   @Column()
   member_id: string;
+
+  @ManyToOne(() => Members, (member) => member.payment, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  member: Members;
 }

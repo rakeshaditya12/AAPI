@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Members } from './members.entity';
 
 @Entity('members_phone', { schema: 'public' })
 export class MembersPhone extends BaseEntity {
@@ -11,7 +19,7 @@ export class MembersPhone extends BaseEntity {
   @Column('character varying', { length: 255 })
   phone_number: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', nullable: true })
   extension: number;
 
   @Column({ default: false })
@@ -19,4 +27,8 @@ export class MembersPhone extends BaseEntity {
 
   @Column()
   member_id: string;
+
+  @ManyToOne(() => Members, (member) => member.phone, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  member: Members;
 }

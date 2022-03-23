@@ -16,13 +16,13 @@ export class MembersAddress extends BaseEntity {
   @Column('character varying', { length: 255 })
   address_type: string;
 
-  @Column('character varying', { length: 255, default: null })
+  @Column('character varying', { length: 255, nullable: true })
   attention: string;
 
   @Column('character varying', { length: 255 })
   address_1: string;
 
-  @Column('character varying', { length: 255, default: null })
+  @Column('character varying', { length: 255, nullable: true })
   address_2: string;
 
   @Column('character varying', { length: 255 })
@@ -31,13 +31,13 @@ export class MembersAddress extends BaseEntity {
   @Column('character varying', { length: 255 })
   state: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('character varying', { length: 255, default: 'United States' })
   country: string;
 
   @Column({ type: 'int' })
   zip_code: number;
 
-  @Column({ default: true })
+  @Column({ default: false })
   is_primary_address: boolean;
 
   @Column({ default: false })
@@ -49,7 +49,7 @@ export class MembersAddress extends BaseEntity {
   // @Column()
   // memberId: string;
 
-  @ManyToOne(() => Members, (member) => member.address)
+  @ManyToOne(() => Members, (member) => member.address, { onDelete: 'CASCADE' })
   @JoinColumn()
   member: Members;
 }

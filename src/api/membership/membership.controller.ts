@@ -6,6 +6,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
+import { CreateQuickMemberDto } from './dto/create-quick-member.dto';
 import { SearchMemberDto } from './dto/search-member.dto';
 import { MembershipService } from './membership.service';
 
@@ -17,6 +18,12 @@ export class MembershipController {
   @UsePipes(ValidationPipe)
   create(@Body() createMemberDto: CreateMemberDto) {
     return this.membershipService.create(createMemberDto);
+  }
+
+  @Post('quick-register')
+  @UsePipes(ValidationPipe)
+  quickCreateMember(@Body() createQuickMemberDto: CreateQuickMemberDto) {
+    return this.membershipService.quickCreateMember(createQuickMemberDto);
   }
 
   @Post('search')

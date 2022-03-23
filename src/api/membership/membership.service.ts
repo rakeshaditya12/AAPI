@@ -8,6 +8,7 @@ import { MembersRepository } from 'src/database/repositories/member.repository';
 import { hashPassword } from 'src/utils/password';
 import { createQueryBuilder, getManager, getRepository } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
+import { CreateQuickMemberDto } from './dto/create-quick-member.dto';
 import { SearchMemberDto } from './dto/search-member.dto';
 
 @Injectable()
@@ -91,11 +92,11 @@ export class MembershipService {
     }
     member.username = createMemberDto.username;
     member.password = await hashPassword(createMemberDto.password);
-    member.address_details = JSON.stringify(createMemberDto.address_details);
-    member.phone_details = JSON.stringify(createMemberDto.phone_details);
-    member.education_details = JSON.stringify(
-      createMemberDto.education_details,
-    );
+    // member.address_details = JSON.stringify(createMemberDto.address_details);
+    // member.phone_details = JSON.stringify(createMemberDto.phone_details);
+    // member.education_details = JSON.stringify(
+    //   createMemberDto.education_details,
+    // );
     if ('residency_institution' in createMemberDto) {
       member.residency_institution = createMemberDto.residency_institution;
     }
@@ -155,7 +156,8 @@ export class MembershipService {
         if ('phone_visible' in singlePhone) {
           membersPhone.phone_visible = singlePhone.phone_visible;
         }
-        membersPhone.member_id = member.id;
+        // membersPhone.member_id = member.id;
+        membersPhone.member = member;
         await membersPhone.save();
       });
 
@@ -168,7 +170,8 @@ export class MembershipService {
           singleEducation.medical_school_start_year;
         membersEducation.medical_school_end_year =
           singleEducation.medical_school_end_year;
-        membersEducation.member_id = member.id;
+        // membersEducation.member_id = member.id;
+        membersEducation.member = member;
         await membersEducation.save();
 
         if (createMemberDto.payment) {
@@ -200,11 +203,89 @@ export class MembershipService {
             createMemberDto.payment_details[0].billing_address_state;
           membersPayment.billing_address_zip =
             createMemberDto.payment_details[0].billing_address_zip;
-          membersPayment.member_id = member.id;
+          // membersPayment.member_id = member.id;
+          membersPayment.member = member;
           await membersPayment.save();
         }
       });
     }
+  }
+
+  async quickCreateMember(createQuickMemberDto: CreateQuickMemberDto) {
+    const alreadyExistMember = await this.membersRepository.findByEmail(
+      createQuickMemberDto.username,
+    );
+
+    if (alreadyExistMember) {
+      throw new BadRequestException(
+        `member with email id ${createQuickMemberDto.username} already exist`,
+      );
+    }
+    console.log(createQuickMemberDto);
+    const member = new Members();
+    member.member_type = createQuickMemberDto.member_type;
+    member.member_sub_type = createQuickMemberDto.member_sub_type;
+
+    member.first_name = createQuickMemberDto.first_name;
+
+    member.last_name = createQuickMemberDto.last_name;
+    member.primary_degree = createQuickMemberDto.primary_degree;
+
+    member.primary_specialty = createQuickMemberDto.primary_specialty;
+
+    member.primary_email_address = createQuickMemberDto.primary_email_address;
+
+    if ('state_of_medical_licence' in createQuickMemberDto) {
+      member.state_of_medical_licence =
+        createQuickMemberDto.state_of_medical_licence;
+    }
+    member.username = createQuickMemberDto.username;
+    member.password = await hashPassword(createQuickMemberDto.password);
+    member.amount = createQuickMemberDto.amount;
+    await member.save();
+
+    if (member.id) {
+      const membersAddress = new MembersAddress();
+      createQuickMemberDto.address_details.forEach(async (singleAddress) => {
+        membersAddress.address_type = singleAddress.address_type;
+
+        membersAddress.address_1 = singleAddress.address;
+
+        membersAddress.city = singleAddress.city;
+        membersAddress.state = singleAddress.state;
+        if ('country' in singleAddress) {
+          membersAddress.country = singleAddress.country;
+        }
+        membersAddress.zip_code = singleAddress.zip_code;
+
+        // membersAddress.member_id = member.id;
+        membersAddress.member = member;
+        await membersAddress.save();
+      });
+
+      const membersPhone = new MembersPhone();
+      createQuickMemberDto.phone_details.forEach(async (singlePhone) => {
+        membersPhone.phone_type = singlePhone.phone_type;
+        membersPhone.phone_number = singlePhone.phone_number;
+
+        // membersPhone.member_id = member.id;
+        membersPhone.member = member;
+        await membersPhone.save();
+      });
+
+      const membersEducation = new MembersEducation();
+      createQuickMemberDto.education_details.forEach(
+        async (singleEducation) => {
+          membersEducation.medical_school_name =
+            singleEducation.medical_school_name;
+
+          // membersEducation.member_id = member.id;
+          membersEducation.member = member;
+          await membersEducation.save();
+        },
+      );
+    }
+    return member;
   }
 
   async searchMembers(searchMemberDto: SearchMemberDto) {
@@ -221,7 +302,7 @@ export class MembershipService {
         'address',
         'address.city = :city',
         {
-          city: 'cityy',
+          city: 'city',
         },
       )
       .getMany();
