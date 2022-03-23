@@ -54,6 +54,7 @@
     "rimraf": "^3.0.2",
     "role-acl": "^4.5.4",
     "rxjs": "^6.6.6",
+    "stripe": "^8.210.0",
     "typeorm": "^0.2.34",
     "typeorm-naming-strategies": "^2.0.0"
   },

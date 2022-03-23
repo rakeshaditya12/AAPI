@@ -284,6 +284,25 @@ export class MembershipService {
           await membersEducation.save();
         },
       );
+
+      if (createQuickMemberDto.payment) {
+        const membersPayment = new MembersPayment();
+        membersPayment.card_holder_name =
+          createQuickMemberDto.payment_details[0].card_holder_name;
+        membersPayment.card_type =
+          createQuickMemberDto.payment_details[0].card_type;
+        membersPayment.card_number =
+          createQuickMemberDto.payment_details[0].card_number;
+        membersPayment.card_expiration_date =
+          createQuickMemberDto.payment_details[0].card_expiration_date;
+        membersPayment.card_cvv_number =
+          createQuickMemberDto.payment_details[0].card_cvv_number;
+        membersPayment.amount = createQuickMemberDto.payment_details[0].amount;
+
+        // membersPayment.member_id = member.id;
+        membersPayment.member = member;
+        await membersPayment.save();
+      }
     }
     return member;
   }

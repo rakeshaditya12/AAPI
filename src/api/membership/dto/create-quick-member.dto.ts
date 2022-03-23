@@ -175,26 +175,4 @@ class PaymentDetails {
   @IsNotEmpty()
   @IsInt()
   amount: number;
-
-  @IsOptional()
-  copy_address_from: string;
-
-  @IsNotEmpty()
-  @IsString()
-  billing_address_one: string;
-
-  @IsOptional()
-  billing_address_two: string;
-
-  @IsNotEmpty()
-  @IsString()
-  billing_address_city: string;
-
-  @IsNotEmpty()
-  @IsString()
-  billing_address_state: string;
-
-  @IsNotEmpty()
-  @IsInt()
-  billing_address_zip: number;
 }

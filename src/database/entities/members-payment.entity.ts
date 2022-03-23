@@ -32,22 +32,22 @@ export class MembersPayment extends BaseEntity {
   @Column({ type: 'int' })
   amount: number;
 
-  @Column('character varying', { length: 255, default: null })
+  @Column('character varying', { length: 255, nullable: true })
   copy_address_from: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('character varying', { length: 255, nullable: true })
   billing_address_one: string;
 
-  @Column('character varying', { length: 255, default: null })
+  @Column('character varying', { length: 255, nullable: true })
   billing_address_two: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('character varying', { length: 255, nullable: true })
   billing_address_city: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('character varying', { length: 255, nullable: true })
   billing_address_state: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   billing_address_zip: number;
 
   @Column()
