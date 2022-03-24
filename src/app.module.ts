@@ -8,6 +8,7 @@ import { RolesGuard } from './roles/roles.guard';
 import { AppController } from './app.controller';
 import { MembershipModule } from './api/membership/membership.module';
 import { StripeModule } from './stripe/stripe.module';
+import { STRIPE } from './stripe/stripe-constants';
 
 @Module({
   imports: [
@@ -15,10 +16,7 @@ import { StripeModule } from './stripe/stripe.module';
     ConfigModule,
     AuthModule,
     MembershipModule,
-    StripeModule.forRoot(
-      'sk_test_51JFYQESCG96xkedGA2PyBMZArAU7hgXzbus5PcrTfutmmune6oJZM5cpMw4gwS1P2qYof3oACEEYizE2kTLI2J7L00CYaS8Xzj',
-      { apiVersion: '2020-08-27' },
-    ),
+    StripeModule.forRoot(STRIPE.SECRET_KEY, { apiVersion: '2020-08-27' }),
   ],
   controllers: [AppController],
   providers: [

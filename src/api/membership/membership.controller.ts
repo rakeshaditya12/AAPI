@@ -13,6 +13,7 @@ import { CreateQuickMemberDto } from './dto/create-quick-member.dto';
 import { SearchMemberDto } from './dto/search-member.dto';
 import { MembershipService } from './membership.service';
 import Stripe from 'stripe';
+import { CustomRepositoryNotFoundError } from 'typeorm';
 
 @Controller('membership')
 export class MembershipController {
@@ -40,7 +41,44 @@ export class MembershipController {
   }
 
   @Get('stripe')
-  getList() {
-    return this.stripe.customers.list();
+  async getList() {
+    try {
+      const customer = await this.stripe.customers.create({
+        name: 'rakesh',
+        email: 'raditya@deqode.com',
+      });
+
+      const customerID = customer.id;
+
+      const paymentMethod = await this.stripe.paymentMethods.create({
+        type: 'card',
+        card: {
+          number: '4242424242424242',
+          exp_month: 3,
+          exp_year: 2025,
+          cvc: '314',
+        },
+      });
+
+      const paymentMethodID = paymentMethod.id;
+
+      const paymentMethodAttach = await this.stripe.paymentMethods.attach(
+        paymentMethodID,
+        { customer: customerID },
+      );
+
+      const paymentIntent = await this.stripe.paymentIntents.create({
+        amount: 1000,
+        currency: 'USD',
+        payment_method: paymentMethodID,
+        payment_method_types: ['card'],
+        customer: customerID,
+        confirm: true,
+      });
+
+      return paymentIntent;
+    } catch (error) {
+      return error;
+    }
   }
 }
