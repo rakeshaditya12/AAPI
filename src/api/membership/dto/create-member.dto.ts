@@ -182,7 +182,7 @@ export class CreateMemberDto {
   @IsBoolean()
   payment: boolean;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   amount: number;
 

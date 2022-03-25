@@ -13,7 +13,7 @@ import { CreateQuickMemberDto } from './dto/create-quick-member.dto';
 import { SearchMemberDto } from './dto/search-member.dto';
 import { MembershipService } from './membership.service';
 import Stripe from 'stripe';
-import { CustomRepositoryNotFoundError } from 'typeorm';
+import { STRIPE } from 'src/stripe/stripe-constants';
 
 @Controller('membership')
 export class MembershipController {
@@ -43,13 +43,20 @@ export class MembershipController {
   @Get('stripe')
   async getList() {
     try {
-      const customer = await this.stripe.customers.create({
-        name: 'rakesh',
-        email: 'raditya@deqode.com',
-      });
+      
+      const stripe = require('stripe')(STRIPE.SECRET_KEY);
 
-      const customerID = customer.id;
-
+const token = await stripe.tokens.create({
+  card: {
+    number: '4242424242424242',
+    exp_month: 3,
+    exp_year: 2023,
+    cvc: '314',
+  },
+});
+// return token;
+     
+ 
       const paymentMethod = await this.stripe.paymentMethods.create({
         type: 'card',
         card: {
@@ -62,10 +69,20 @@ export class MembershipController {
 
       const paymentMethodID = paymentMethod.id;
 
-      const paymentMethodAttach = await this.stripe.paymentMethods.attach(
-        paymentMethodID,
-        { customer: customerID },
-      );
+      const customer = await this.stripe.customers.create({
+        name: 'rakesh',
+        email: 'raditya@deqode.com',
+        // payment_method: paymentMethodID
+      });
+
+      const customerID = customer.id;
+
+    //  return customer;
+
+      // const paymentMethodAttach = await this.stripe.paymentMethods.attach(
+      //   paymentMethodID,
+      //   { customer: customerID },
+      // );
 
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: 1000,
@@ -75,8 +92,9 @@ export class MembershipController {
         customer: customerID,
         confirm: true,
       });
-
+ 
       return paymentIntent;
+     
     } catch (error) {
       return error;
     }

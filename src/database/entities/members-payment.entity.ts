@@ -17,10 +17,17 @@ export class MembersPayment extends BaseEntity {
   @Column('character varying', { length: 255 })
   card_holder_name: string;
 
-  @Column({ type: 'enum', enum: CardType, default: CardType.AmericanExpress })
+  @Column({
+    type: 'enum',
+    enum: CardType,
+    nullable: true,
+    // default: CardType.AmericanExpress,
+  })
   card_type: CardType;
 
-  @Column({ type: 'int' })
+  @Column({
+    type: 'bigint',
+  })
   card_number: number;
 
   @Column('character varying', { length: 255 })
@@ -56,4 +63,7 @@ export class MembersPayment extends BaseEntity {
   @ManyToOne(() => Members, (member) => member.payment, { onDelete: 'CASCADE' })
   @JoinColumn()
   member: Members;
+
+  @Column('character varying', { length: 255, nullable: true })
+  stripeCustomerId: string;
 }

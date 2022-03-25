@@ -22,10 +22,6 @@ import { Match } from 'src/decorators/match.decorators';
 
 export class CreateQuickMemberDto {
   @IsNotEmpty()
-  @IsBoolean()
-  qucik_registration: boolean;
-
-  @IsNotEmpty()
   @IsEnum(MemberType)
   member_type: MemberType;
 
@@ -96,7 +92,7 @@ export class CreateQuickMemberDto {
   @IsBoolean()
   payment: boolean;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   amount: number;
 
@@ -156,9 +152,9 @@ class PaymentDetails {
   @IsString()
   card_holder_name: string;
 
-  @IsNotEmpty()
-  @IsEnum(CardType)
-  card_type: CardType;
+  // @IsNotEmpty()
+  // @IsEnum(CardType)
+  // card_type: CardType;
 
   @IsNotEmpty()
   @IsInt()

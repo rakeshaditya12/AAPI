@@ -142,7 +142,7 @@ export class Members extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   fellowship_end_year: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', default: 0 })
   amount: number;
 
   @OneToMany(() => MemberTokens, (memberTokens) => memberTokens.members)
@@ -159,4 +159,7 @@ export class Members extends BaseEntity {
 
   @OneToMany(() => MembersPayment, (payment) => payment.member)
   payment: MembersPayment;
+
+  @Column('character varying', { length: 255, nullable: true })
+  stripeCustomerId: string;
 }
