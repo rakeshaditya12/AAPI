@@ -17,24 +17,24 @@ export class MembersPayment extends BaseEntity {
   @Column('character varying', { length: 255 })
   card_holder_name: string;
 
-  @Column({
-    type: 'enum',
-    enum: CardType,
-    nullable: true,
-    // default: CardType.AmericanExpress,
-  })
-  card_type: CardType;
+  // @Column({
+  //   type: 'enum',
+  //   enum: CardType,
+  //   nullable: true,
+  //   // default: CardType.AmericanExpress,
+  // })
+  // card_type: CardType;
 
-  @Column({
-    type: 'bigint',
-  })
-  card_number: number;
+  // @Column({
+  //   type: 'bigint',
+  // })
+  // card_number: number;
 
-  @Column('character varying', { length: 255 })
-  card_expiration_date: string;
+  // @Column('character varying', { length: 255 })
+  // card_expiration_date: string;
 
-  @Column({ type: 'int' })
-  card_cvv_number: number;
+  // @Column({ type: 'int' })
+  // card_cvv_number: number;
 
   @Column({ type: 'int' })
   amount: number;

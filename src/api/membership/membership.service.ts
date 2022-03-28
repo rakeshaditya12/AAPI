@@ -12,6 +12,8 @@ import { CreateQuickMemberDto } from './dto/create-quick-member.dto';
 import { SearchMemberDto } from './dto/search-member.dto';
 import Stripe from 'stripe';
 import { STRIPE_CLIENT } from 'src/stripe/constants';
+import { STRIPE } from 'src/stripe/stripe-constants';
+import { AvailableMemberDto } from './dto/available-member.dto';
 
 @Injectable()
 export class MembershipService {
@@ -183,14 +185,14 @@ export class MembershipService {
           const membersPayment = new MembersPayment();
           membersPayment.card_holder_name =
             createMemberDto.payment_details[0].card_holder_name;
-          membersPayment.card_type =
-            createMemberDto.payment_details[0].card_type;
-          membersPayment.card_number =
-            createMemberDto.payment_details[0].card_number;
-          membersPayment.card_expiration_date =
-            createMemberDto.payment_details[0].card_expiration_date;
-          membersPayment.card_cvv_number =
-            createMemberDto.payment_details[0].card_cvv_number;
+          // membersPayment.card_type =
+          //   createMemberDto.payment_details[0].card_type;
+          // membersPayment.card_number =
+          //   createMemberDto.payment_details[0].card_number;
+          // membersPayment.card_expiration_date =
+          //   createMemberDto.payment_details[0].card_expiration_date;
+          // membersPayment.card_cvv_number =
+          //   createMemberDto.payment_details[0].card_cvv_number;
           membersPayment.amount = createMemberDto.payment_details[0].amount;
           if ('copy_address_from' in createMemberDto.payment_details[0]) {
             membersPayment.copy_address_from =
@@ -216,6 +218,22 @@ export class MembershipService {
     }
   }
 
+  async availableMember(availableMemberDto: AvailableMemberDto) {
+    const alreadyExistMember = await this.membersRepository.findByEmail(
+      availableMemberDto.uname,
+    );
+
+    if (alreadyExistMember) {
+      throw new BadRequestException(
+        `member with email id ${availableMemberDto.uname} already exist`,
+      );
+    }
+    return {
+      statusCode: 200,
+      message: `member with email id ${availableMemberDto.uname} available`,
+    };
+  }
+
   async quickCreateMember(createQuickMemberDto: CreateQuickMemberDto) {
     const alreadyExistMember = await this.membersRepository.findByEmail(
       createQuickMemberDto.username,
@@ -228,33 +246,26 @@ export class MembershipService {
     }
     // *****************************
     if (createQuickMemberDto.payment) {
-      const stripePaymentMethod = await this.createStripePaymentMethod(
+      const stripeCardToken = await this.createStripeCardToken(
         createQuickMemberDto.payment_details[0].card_number,
         createQuickMemberDto.payment_details[0].card_expiration_date,
         createQuickMemberDto.payment_details[0].card_cvv_number,
       );
 
-      if (
-        stripePaymentMethod['id'] &&
-        stripePaymentMethod['object'] == 'payment_method'
-      ) {
+      if (stripeCardToken['id'] && stripeCardToken['object'] == 'token') {
         const stripeCustomer = await this.createStripeCustomer(
           createQuickMemberDto.payment_details[0].card_holder_name,
           createQuickMemberDto.primary_email_address,
+          stripeCardToken.id,
         );
 
         if (stripeCustomer['id'] && stripeCustomer['object'] == 'customer') {
-          await this.attachStripeCreditCard(
-            stripeCustomer['id'],
-            stripePaymentMethod['id'],
-          );
-
           const stripeCharge = await this.createStripeCharge(
             createQuickMemberDto.payment_details[0].amount,
-            stripePaymentMethod['id'],
             stripeCustomer['id'],
+            stripeCustomer['default_source'],
           );
-          // return stripeCharge;
+
           if (
             stripeCharge['id'] &&
             stripeCharge['object'] == 'payment_intent' &&
@@ -264,8 +275,12 @@ export class MembershipService {
               createQuickMemberDto,
               stripeCustomer['id'],
             );
+          } else {
+            return stripeCharge;
           }
         }
+      } else {
+        return stripeCardToken;
       }
     } else {
       return await this.saveMemberDetails(createQuickMemberDto);
@@ -273,15 +288,17 @@ export class MembershipService {
     // *****************************
   }
 
-  async createStripePaymentMethod(
+  async createStripeCardToken(
     cardNumber: number,
     cardExpiration: string,
     cardCVV: number,
   ) {
     try {
       const cardExpArr = cardExpiration.split('/');
-      const stripePaymentMethod = await this.stripe.paymentMethods.create({
-        type: 'card',
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const stripeClient = require('stripe')(STRIPE.SECRET_KEY);
+
+      const stripeCardToken = await stripeClient.tokens.create({
         card: {
           number: cardNumber.toString(),
           exp_month: parseInt(cardExpArr[0]),
@@ -290,17 +307,18 @@ export class MembershipService {
         },
       });
 
-      return stripePaymentMethod;
+      return stripeCardToken;
     } catch (error) {
       return { status: 'error', message: error.raw.message };
     }
   }
 
-  async createStripeCustomer(name: string, email: string) {
+  async createStripeCustomer(name: string, email: string, source: string) {
     try {
       const stripeCustomer = await this.stripe.customers.create({
         name: name,
         email: email,
+        source: source,
       });
 
       return stripeCustomer;
@@ -309,17 +327,19 @@ export class MembershipService {
     }
   }
 
-  async attachStripeCreditCard(
+  async createStripeSource(
     stripeCustomerId: string,
-    stripePaymentMethodId: string,
+    stripeCardTokenId: string,
   ) {
     try {
-      const stripePaymentMethodAttach = await this.stripe.paymentMethods.attach(
-        stripePaymentMethodId,
-        { customer: stripeCustomerId },
+      const stripeCard = await this.stripe.customers.createSource(
+        stripeCustomerId,
+        {
+          source: stripeCardTokenId,
+        },
       );
 
-      return stripePaymentMethodAttach;
+      return stripeCard;
     } catch (error) {
       return { status: 'error', message: error.raw.message };
     }
@@ -327,14 +347,14 @@ export class MembershipService {
 
   async createStripeCharge(
     amount: number,
-    stripePaymentMethodId: string,
     stripeCustomerId: string,
+    default_source: string,
   ) {
     try {
       const stripePaymentIntent = await this.stripe.paymentIntents.create({
         amount: amount,
         currency: 'USD',
-        payment_method: stripePaymentMethodId,
+        payment_method: default_source,
         payment_method_types: ['card'],
         customer: stripeCustomerId,
         confirm: true,
@@ -351,7 +371,7 @@ export class MembershipService {
     stripeCustomerId?: string,
   ) {
     console.log(createQuickMemberDto);
-    
+
     const member = new Members();
     member.member_type = createQuickMemberDto.member_type;
     member.member_sub_type = createQuickMemberDto.member_sub_type;
@@ -428,12 +448,12 @@ export class MembershipService {
           createQuickMemberDto.payment_details[0].card_holder_name;
         // membersPayment.card_type =
         //   createQuickMemberDto.payment_details[0].card_type;
-        membersPayment.card_number =
-          createQuickMemberDto.payment_details[0].card_number;
-        membersPayment.card_expiration_date =
-          createQuickMemberDto.payment_details[0].card_expiration_date;
-        membersPayment.card_cvv_number =
-          createQuickMemberDto.payment_details[0].card_cvv_number;
+        // membersPayment.card_number =
+        //   createQuickMemberDto.payment_details[0].card_number;
+        // membersPayment.card_expiration_date =
+        //   createQuickMemberDto.payment_details[0].card_expiration_date;
+        // membersPayment.card_cvv_number =
+        //   createQuickMemberDto.payment_details[0].card_cvv_number;
         membersPayment.amount = createQuickMemberDto.payment_details[0].amount;
         if (stripeCustomerId) {
           membersPayment.stripeCustomerId = stripeCustomerId;

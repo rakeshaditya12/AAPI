@@ -83,6 +83,9 @@ const schema = {
     default: '7472756546692d7661756c742d4465716f6465',
     env: 'SECRET_HEX',
   },
+  stripe: {
+    secret_key: process.env.SECRET_KEY,
+  },
 };
 
 dotenv.config();
