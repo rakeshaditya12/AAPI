@@ -23,7 +23,7 @@ export class MembershipController {
     @Inject(STRIPE_CLIENT) private stripe: Stripe,
   ) {}
 
-  @Get('availableMember')
+  @Post('availableMember')
   @UsePipes(ValidationPipe)
   availableMember(@Body() availableMemberDto: AvailableMemberDto) {
     return this.membershipService.availableMember(availableMemberDto);

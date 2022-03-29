@@ -6,7 +6,7 @@ import { MembersPhone } from 'src/database/entities/members-phone.entity';
 import { Members } from 'src/database/entities/members.entity';
 import { MembersRepository } from 'src/database/repositories/member.repository';
 import { hashPassword } from 'src/utils/password';
-import { createQueryBuilder, getManager, getRepository } from 'typeorm';
+import { createQueryBuilder } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { CreateQuickMemberDto } from './dto/create-quick-member.dto';
 import { SearchMemberDto } from './dto/search-member.dto';
@@ -271,7 +271,7 @@ export class MembershipService {
             stripeCharge['object'] == 'payment_intent' &&
             stripeCharge['status'] == 'succeeded'
           ) {
-            return await this.saveMemberDetails(
+            return await this.saveQuickMemberDetails(
               createQuickMemberDto,
               stripeCustomer['id'],
             );
@@ -283,7 +283,7 @@ export class MembershipService {
         return stripeCardToken;
       }
     } else {
-      return await this.saveMemberDetails(createQuickMemberDto);
+      return await this.saveQuickMemberDetails(createQuickMemberDto);
     }
     // *****************************
   }
@@ -348,13 +348,13 @@ export class MembershipService {
   async createStripeCharge(
     amount: number,
     stripeCustomerId: string,
-    default_source: string,
+    defaultSource: string,
   ) {
     try {
       const stripePaymentIntent = await this.stripe.paymentIntents.create({
         amount: amount,
         currency: 'USD',
-        payment_method: default_source,
+        payment_method: defaultSource,
         payment_method_types: ['card'],
         customer: stripeCustomerId,
         confirm: true,
@@ -366,7 +366,7 @@ export class MembershipService {
     }
   }
 
-  async saveMemberDetails(
+  async saveQuickMemberDetails(
     createQuickMemberDto: CreateQuickMemberDto,
     stripeCustomerId?: string,
   ) {
@@ -467,23 +467,32 @@ export class MembershipService {
   }
 
   async searchMembers(searchMemberDto: SearchMemberDto) {
-    console.log(searchMemberDto);
-
-    const query = createQueryBuilder('members', 'member')
+    const createQuery = createQueryBuilder('members', 'member')
       .innerJoinAndSelect('member.address', 'address')
-      .where({ first_name: 'rakesh', last_name: 'hirve' });
+      .where('member.first_name like :fname', {
+        fname: `%${searchMemberDto.first_name}%`,
+      });
 
-    return this.membersRepository
-      .createQueryBuilder('members')
-      .innerJoinAndSelect(
-        'members.address',
-        'address',
-        'address.city = :city',
-        {
-          city: 'city',
-        },
-      )
-      .getMany();
-    return await query.getMany();
+    if ('last_name' in searchMemberDto) {
+      createQuery.andWhere('member.last_name like :lname', {
+        lname: `%${searchMemberDto.last_name}%`,
+      });
+    }
+
+    if ('city' in searchMemberDto) {
+      createQuery.andWhere('address.city like :city', {
+        city: `%${searchMemberDto.city}%`,
+      });
+    }
+
+    if ('state' in searchMemberDto) {
+      createQuery.andWhere('address.state like :state', {
+        state: `%${searchMemberDto.state}%`,
+      });
+    }
+
+    const searchData = await createQuery.getMany();
+
+    return searchData;
   }
 }

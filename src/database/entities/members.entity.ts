@@ -109,7 +109,7 @@ export class Members extends BaseEntity {
   @Column('character varying', { unique: true, length: 255 })
   username: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('character varying', { length: 255, select: false })
   password: string;
 
   // // @Column({ type: 'json' })
