@@ -32,6 +32,54 @@ export class MembershipService {
         `member with email id ${createMemberDto.username} already exist`,
       );
     }
+    // *****************************
+    if (createMemberDto.payment) {
+      const stripeCardToken = await this.createStripeCardToken(
+        createMemberDto.payment_details[0].card_number,
+        createMemberDto.payment_details[0].card_expiration_date,
+        createMemberDto.payment_details[0].card_cvv_number,
+      );
+
+      if (stripeCardToken['id'] && stripeCardToken['object'] == 'token') {
+        const stripeCustomer = await this.createStripeCustomer(
+          createMemberDto.payment_details[0].card_holder_name,
+          createMemberDto.primary_email_address,
+          stripeCardToken.id,
+        );
+
+        if (stripeCustomer['id'] && stripeCustomer['object'] == 'customer') {
+          const stripeCharge = await this.createStripeCharge(
+            createMemberDto.payment_details[0].amount,
+            stripeCustomer['id'],
+            stripeCustomer['default_source'],
+          );
+
+          if (
+            stripeCharge['id'] &&
+            stripeCharge['object'] == 'payment_intent' &&
+            stripeCharge['status'] == 'succeeded'
+          ) {
+            return await this.saveLongMemberDetails(
+              createMemberDto,
+              stripeCustomer['id'],
+            );
+          } else {
+            return stripeCharge;
+          }
+        }
+      } else {
+        return stripeCardToken;
+      }
+    } else {
+      return await this.saveLongMemberDetails(createMemberDto);
+    }
+    // *****************************
+  }
+
+  async saveLongMemberDetails(
+    createMemberDto: CreateMemberDto,
+    stripeCustomerId?: string,
+  ) {
     console.log(createMemberDto);
     const member = new Members();
     member.member_type = createMemberDto.member_type;
@@ -124,7 +172,13 @@ export class MembershipService {
     if ('fellowship_end_year' in createMemberDto) {
       member.fellowship_end_year = createMemberDto.fellowship_end_year;
     }
-    member.amount = createMemberDto.amount;
+    if ('amount' in createMemberDto) {
+      member.amount = createMemberDto.amount;
+    }
+    if (stripeCustomerId) {
+      member.stripeCustomerId = stripeCustomerId;
+    }
+
     await member.save();
 
     if (member.id) {
@@ -211,13 +265,15 @@ export class MembershipService {
           membersPayment.billing_address_zip =
             createMemberDto.payment_details[0].billing_address_zip;
           // membersPayment.member_id = member.id;
+          if (stripeCustomerId) {
+            membersPayment.stripeCustomerId = stripeCustomerId;
+          }
           membersPayment.member = member;
           await membersPayment.save();
         }
       });
     }
   }
-
   async availableMember(availableMemberDto: AvailableMemberDto) {
     const alreadyExistMember = await this.membersRepository.findByEmail(
       availableMemberDto.uname,
