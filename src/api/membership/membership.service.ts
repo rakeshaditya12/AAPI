@@ -273,6 +273,7 @@ export class MembershipService {
         }
       });
     }
+    return member;
   }
   async availableMember(availableMemberDto: AvailableMemberDto) {
     const alreadyExistMember = await this.membersRepository.findByEmail(
